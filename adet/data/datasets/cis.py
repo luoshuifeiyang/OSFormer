@@ -97,6 +97,12 @@ def register_nc4k_dataset():
     pass
 
 
+# 添加register_dataset函数以兼容原始代码
+def register_dataset():
+    """兼容原始代码的注册函数"""
+    register_all_cis()
+
+
 # 在模块加载时自动注册数据集
 if __name__ != "__main__":
     register_all_cis()
