@@ -1,0 +1,58 @@
+_BASE_: "Base-CIS.yaml"
+
+MODEL:
+  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+  BACKBONE:
+    NAME: "build_resnet_backbone"
+  RESNETS:
+    DEPTH: 50
+    STEM_TYPE: "basic"
+    STEM_OUT_CHANNELS: 64
+    STRIDE_IN_1X1: False
+    OUT_FEATURES: ["res2", "res3", "res4", "res5"]
+    NORM: "BN"
+    RES5_MULTI_GRID: [1, 1, 1]
+  FPN:
+    IN_FEATURES: ["res2", "res3", "res4", "res5"]
+    OUT_CHANNELS: 256
+    NORM: "BN"
+
+# 修改数据集配置为你的自定义数据集
+DATASETS:
+  TRAIN: ("cis_train",)
+  TEST: ("cis_test",)
+
+# 修改类别数（根据你的实际类别数量）
+MODEL:
+  OSFormer:
+    NUM_CLASSES: 8  # 你有8个类别
+  ROI_HEADS:
+    NUM_CLASSES: 8  # 确保这里也是8
+
+# 训练配置
+SOLVER:
+  IMS_PER_BATCH: 2        # 根据你的GPU内存调整
+  BASE_LR: 0.00025        # 学习率
+  STEPS: (8000, 11000)    # 学习率衰减步骤
+  MAX_ITER: 12000         # 最大迭代次数
+  WARMUP_ITERS: 1000      # 预热迭代次数
+  CHECKPOINT_PERIOD: 1000 # 保存检查点间隔
+
+# 输入配置
+INPUT:
+  MIN_SIZE_TRAIN: (640, 672, 704, 736, 768, 800)
+  MAX_SIZE_TRAIN: 1333
+  MIN_SIZE_TEST: 800
+  MAX_SIZE_TEST: 1333
+
+# 输出目录
+OUTPUT_DIR: "./output/custom_dataset"
+
+# 测试配置
+TEST:
+  EVAL_PERIOD: 1000
+
+# 数据加载器配置
+DATALOADER:
+  NUM_WORKERS: 4
+  FILTER_EMPTY_ANNOTATIONS: True
