@@ -27,21 +27,30 @@ TEST_JSON = os.path.join(ANN_ROOT, 'lis_coco_JPG_test+1.json')
 def register_all_cis():
     """注册所有CIS相关数据集"""
 
+    # 检查是否已经注册，避免重复注册
+    from detectron2.data import DatasetCatalog
+
     # 注册训练集
-    if os.path.exists(TRAIN_JSON) and os.path.exists(TRAIN_PATH):
-        register_coco_instances("cis_train", {}, TRAIN_JSON, TRAIN_PATH)
-        print(f"✓ 训练集注册成功: {TRAIN_JSON}")
+    if "cis_train" not in DatasetCatalog:
+        if os.path.exists(TRAIN_JSON) and os.path.exists(TRAIN_PATH):
+            register_coco_instances("cis_train", {}, TRAIN_JSON, TRAIN_PATH)
+            print(f"✓ 训练集注册成功: {TRAIN_JSON}")
+        else:
+            print(f"✗ 训练集路径不存在: {TRAIN_JSON} 或 {TRAIN_PATH}")
     else:
-        print(f"✗ 训练集路径不存在: {TRAIN_JSON} 或 {TRAIN_PATH}")
+        print(f"ℹ 训练集已经注册过，跳过重复注册")
 
     # 注册测试集
-    if os.path.exists(TEST_JSON) and os.path.exists(TEST_PATH):
-        register_coco_instances("cis_test", {}, TEST_JSON, TEST_PATH)
-        print(f"✓ 测试集注册成功: {TEST_JSON}")
+    if "cis_test" not in DatasetCatalog:
+        if os.path.exists(TEST_JSON) and os.path.exists(TEST_PATH):
+            register_coco_instances("cis_test", {}, TEST_JSON, TEST_PATH)
+            print(f"✓ 测试集注册成功: {TEST_JSON}")
+        else:
+            print(f"✗ 测试集路径不存在: {TEST_JSON} 或 {TEST_PATH}")
     else:
-        print(f"✗ 测试集路径不存在: {TEST_JSON} 或 {TEST_PATH}")
+        print(f"ℹ 测试集已经注册过，跳过重复注册")
 
-    # 从注解文件中自动获取类别信息
+    # 设置类别信息（只在第一次注册时设置）
     import json
     try:
         with open(TRAIN_JSON, 'r') as f:
@@ -54,8 +63,10 @@ def register_all_cis():
         # 设置元数据
         for dataset_name in ["cis_train", "cis_test"]:
             try:
-                MetadataCatalog.get(dataset_name).thing_classes = thing_classes
-                MetadataCatalog.get(dataset_name).evaluator_type = "coco"
+                metadata = MetadataCatalog.get(dataset_name)
+                if not hasattr(metadata, 'thing_classes') or not metadata.thing_classes:
+                    metadata.thing_classes = thing_classes
+                    metadata.evaluator_type = "coco"
             except:
                 pass  # 如果数据集不存在就跳过
 
@@ -70,8 +81,10 @@ def register_all_cis():
         # 设置默认类别
         for dataset_name in ["cis_train", "cis_test"]:
             try:
-                MetadataCatalog.get(dataset_name).thing_classes = thing_classes
-                MetadataCatalog.get(dataset_name).evaluator_type = "coco"
+                metadata = MetadataCatalog.get(dataset_name)
+                if not hasattr(metadata, 'thing_classes') or not metadata.thing_classes:
+                    metadata.thing_classes = thing_classes
+                    metadata.evaluator_type = "coco"
             except:
                 pass
 
