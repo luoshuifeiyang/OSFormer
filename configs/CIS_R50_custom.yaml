@@ -31,12 +31,12 @@ MODEL:
 
 # 训练配置
 SOLVER:
-  IMS_PER_BATCH: 2        # 根据你的GPU内存调整
-  BASE_LR: 0.00025        # 学习率
-  STEPS: (8000, 11000)    # 学习率衰减步骤
-  MAX_ITER: 12000         # 最大迭代次数
-  WARMUP_ITERS: 1000      # 预热迭代次数
-  CHECKPOINT_PERIOD: 1000 # 保存检查点间隔
+  IMS_PER_BATCH: 4        # 增加batch size到4
+  BASE_LR: 0.0005         # 学习率相应调整（batch size翻倍，lr也翻倍）
+  STEPS: (40000, 55000)   # 学习率衰减步骤（按5倍调整）
+  MAX_ITER: 60000         # 最大迭代次数（扩大5倍）
+  WARMUP_ITERS: 5000      # 预热迭代次数（按比例调整）
+  CHECKPOINT_PERIOD: 5000 # 保存检查点间隔（调整保存频率）
 
 # 输入配置
 INPUT:
@@ -50,9 +50,9 @@ OUTPUT_DIR: "./output/custom_dataset"
 
 # 测试配置
 TEST:
-  EVAL_PERIOD: 1000
+  EVAL_PERIOD: 100000     # 设置为比MAX_ITER大的值，禁用验证
 
 # 数据加载器配置
 DATALOADER:
-  NUM_WORKERS: 4
+  NUM_WORKERS: 8          # 增加数据加载工作进程（配合更大的batch size）
   FILTER_EMPTY_ANNOTATIONS: True
